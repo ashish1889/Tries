@@ -1,0 +1,65 @@
+//Question: https://leetcode.com/problems/remove-sub-folders-from-the-filesystem/description/
+
+To solve this problem, we need to remove all sub-folders from a given list of folders. A sub-folder is defined as a folder that is contained within another folder in the list. 
+For example, "/a/b" is a sub-folder of "/a". The goal is to return the folders that are not sub-folders of any other folder in the list.
+
+Approach
+
+Sorting the Folders: First, we sort the list of folders lexicographically. This ensures that any parent folder appears before its sub-folders. 
+For instance, "/a" will come before "/a/b" in the sorted list.
+Tracking Parent Folders: As we process each folder in the sorted list, we maintain a string current that represents the last parent folder we encountered.
+For non-root folders, current is the folder path followed by a '/'. For the root folder ("/"), current remains as "/".
+Checking Sub-folders: For each folder in the sorted list, we check if it starts with the current string. 
+If it does, it means the folder is a sub-folder of current, so we skip it. Otherwise, we add it to the result list and update current accordingly.
+
+class Solution {
+public:
+    vector<string> removeSubfolders(vector<string>& folder) {
+        sort(folder.begin(), folder.end());
+        vector<string> res;
+        string current = "";
+        for (string& f : folder) {
+            cout<<"string: "<<f<<std::endl;
+            if (current != "" && f.size() >= current.size() && f.compare(0, current.size(), current) == 0) {
+                continue;
+            }
+            res.push_back(f);
+            current = (f == "/" ? f : f + '/');
+            cout<< current<<std::endl;
+        }
+        return res;
+    }
+};
+
+I/p:
+folder = ["/a","/a/b","/c/d","/c/d/e","/c/f"]
+
+Std O/p:
+
+string: /a
+/a/
+string: /a/b
+string: /c/d
+/c/d/
+string: /c/d/e
+string: /c/f
+/c/f/
+
+O/p:
+
+["/a","/c/d","/c/f"]
+
+Explanation
+
+Sorting: The folders are sorted lexicographically. This ensures that any parent folder (e.g., "/a") appears before its sub-folders (e.g., "/a/b").
+Processing Folders: We iterate through each folder in the sorted list. For each folder:
+If current is not empty and the folder starts with current, it is identified as a sub-folder and skipped.
+Otherwise, the folder is added to the result list, and current is updated. For non-root folders, current is set to the folder path followed by a '/' to 
+facilitate checking sub-folders. For the root folder ("/"), current remains as "/".
+Result Compilation: The result list contains all folders that are not sub-folders of any other folder in the input list.
+This approach efficiently processes the folders in linear time after sorting, leveraging the sorted order to easily identify and skip sub-folders. 
+The sorting step has a time complexity of O(n log n), where n is the number of folders, and the subsequent processing is O(n * m), where m 
+is the average length of the folder paths. The overall complexity is dominated by the sorting step.
+
+
+
