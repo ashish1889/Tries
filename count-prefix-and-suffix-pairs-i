@@ -1,0 +1,83 @@
+//Question: https://leetcode.com/problems/count-prefix-and-suffix-pairs-i/description/
+
+Approach
+
+Trie Node Modification: Each Trie node now includes a count variable to track the number of words ending at that node.
+Insertion Update: When inserting a word, increment the count at the end node instead of setting a boolean flag.
+Counting Pairs: During traversal, whenever a node with a non-zero count is encountered, check if the prefix (formed by characters up to that node)
+is also a suffix of the current word. If it matches, add the node's count to the result.
+Efficiency: The approach efficiently checks all possible prefixes for each word against previously processed words using the Trie. 
+The worst-case time complexity is O(N * L²), where N is the number of words and L is the maximum word length.
+Solution Code:
+
+#include <vector>
+#include <string>
+#include <unordered_map>
+using namespace std;
+
+struct TrieNode {
+    unordered_map<char, TrieNode*> children;
+    int count;
+    TrieNode() : count(0) {}
+};
+
+class Solution {
+private:
+    void insert(TrieNode* root, const string& word) {
+        TrieNode* node = root;
+        for (char c : word) {
+            if (node->children.find(c) == node->children.end()) {
+                node->children[c] = new TrieNode();
+            }
+            node = node->children[c];
+        }
+        node->count++;
+    }
+
+public:
+    int countPrefixSuffixPairs(vector<string>& words) {
+        TrieNode* root = new TrieNode();
+        int ans = 0;
+        for (auto& word : words) {
+            TrieNode* node = root;
+            int n = word.size();
+            for (int i = 0; i < n; i++) {
+                char c = word[i];
+                if (node->children.find(c) == node->children.end()) {
+                    break;
+                }
+                node = node->children[c];
+                if (node->count > 0) {
+                    int len = i + 1;
+                    bool match = true;
+                    for (int j = 0; j < len; j++) {
+                        if (word[j] != word[n - len + j]) {
+                            match = false;
+                            break;
+                        }
+                    }
+                    if (match) {
+                        ans += node->count;
+                    }
+                }
+            }
+            insert(root, word);
+        }
+        return ans;
+    }
+};
+
+
+Explanation
+
+TrieNode Structure: Each node has a map of child nodes and an integer count to track how many words end at that node.
+Insert Function: Adds a word to the Trie by creating nodes as needed and incrementing the count at the end node.
+Main Function:
+Initialization: Starts with an empty Trie and a result counter set to zero.
+Processing Each Word:
+Trie Traversal: For each character in the current word, traverse the Trie. If a character is missing, break early.
+End Node Check: If a node with count > 0 is found, check if the prefix (up to that node) matches the suffix of the current word.
+Count Update: If the prefix matches the suffix, add the node's count to the result.
+Insertion: After processing, the current word is inserted into the Trie for future checks.
+Correctness: The solution correctly handles duplicate words by counting each occurrence, ensuring accurate pair counts for inputs like ["b","b","bb"] 
+(which should return 3). The suffix check verifies that the prefix appears at the end of the current word by comparing characters directly.
