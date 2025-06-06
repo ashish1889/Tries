@@ -1,0 +1,108 @@
+Problem- https://neetcode.io/solutions/extra-characters-in-a-string
+
+Approach1- Recursion
+Pictorial representation-
+https://claude.ai/public/artifacts/9541eea7-7180-421a-93f2-fca84c88fa88
+
+Code-
+
+class Solution {
+ public: 
+ int minExtraChar(string s, vector<string>& dictionary) { 
+ // Convert dictionary to hash set for O(1) lookup 
+ unordered_set<string> words(dictionary.begin(), dictionary.end()); 
+ return dfs(0, s, words);  // Start DFS from index 0 
+  } 
+  private: 
+  int dfs(int i, const string& s, unordered_set<string>& words) { 
+  if (i == s.size()) 
+  return 0; // Base case: reached end 
+  // Option 1: Skip current character (count as extra) 
+  int res = 1 + dfs(i + 1, s, words); 
+  // Option 2: Try to match dictionary words starting from i 
+  for (int j = i; j < s.size(); j++) { 
+  if (words.count(s.substr(i, j - i + 1))) { 
+  res = min(res, dfs(j + 1, s, words)); 
+  } 
+  } 
+  return res;
+   } 
+   };
+
+
+// Optimized version with memoization 
+   class Solution {
+    private:
+     unordered_map<int, int> memo;
+      int dfs(int i, const string& s, unordered_set<string>& words) { 
+      if (i == s.size()) 
+      return 0; 
+      if (memo.count(i)) 
+      return memo[i];
+       int res = 1 + dfs(i + 1, s, words);
+        for (int j = i; j < s.size(); j++) { 
+        string sub = s.substr(i, j - i + 1); 
+        if (words.count(sub)) { 
+        res = min(res, dfs(j + 1, s, words)); 
+        } 
+        } 
+        return memo[i] = res;
+         } 
+         };
+
+
+=========================================================================================================================================================
+
+Approach2- Dynamic Programming (Top-Down) Using Hash Set
+
+https://claude.ai/public/artifacts/8cfadde7-06dc-4ab5-9a42-e7d5648f011d
+
+class Solution { 
+public: 
+int minExtraChar(string s, vector<string>& dictionary) { 
+unordered_set<string> words(dictionary.begin(), dictionary.end()); 
+int n = s.size();
+ vector<int> dp(n + 1, -1); // DP table initialized to -1 
+ dp[n] = 0; // Base case: no more chars = 0 extra 
+ return dfs(0, s, words, dp); 
+ } 
+ private: 
+ int dfs(int i, string& s, unordered_set<string>& words, vector<int>& dp) { 
+ if (dp[i] != -1) 
+ return dp[i]; // Return cached result 
+ int res = 1 + dfs(i + 1, s, words, dp); // Skip current char 
+ for (int j = i; j < s.size(); j++) { 
+ if (words.count(s.substr(i, j - i + 1))) { 
+ res = min(res, dfs(j + 1, s, words, dp)); 
+ } 
+ } 
+ dp[i] = res; // Cache the result 
+ return res; 
+ }
+ };
+
+=================================================================================================================================================================
+
+Approach3- Dynamic Programming (Bottom-Up) Using Hash Set
+
+https://claude.ai/public/artifacts/807be887-0e59-4c8f-b70a-ec028ffc4588
+
+class Solution {
+ public: 
+ int minExtraChar(string s, vector<string>& dictionary) { 
+ unordered_set<string> words(dictionary.begin(), dictionary.end()); 
+ int n = s.size(); 
+ vector<int> dp(n + 1, 0); // Initialize all to 0
+  for (int i = n - 1; i >= 0; i--) { // Process backwards 
+  dp[i] = 1 + dp[i + 1]; // Default: skip current char 
+  for (int j = i; j < n; j++) { // Try all substrings from i 
+  if (words.count(s.substr(i, j - i + 1))) { 
+  dp[i] = min(dp[i], dp[j + 1]); // Use dictionary word 
+  } 
+  } 
+  } 
+  return dp[0]; // Answer for entire string 
+  } 
+  };
+
+https://claude.ai/public/artifacts/807be887-0e59-4c8f-b70a-ec028ffc4588
