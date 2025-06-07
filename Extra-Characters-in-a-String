@@ -105,4 +105,198 @@ class Solution {
   } 
   };
 
-https://claude.ai/public/artifacts/807be887-0e59-4c8f-b70a-ec028ffc4588
+==========================================================================================================================================================================
+
+Approach4- Dynamic Programming (Top-Down)
+
+https://claude.ai/public/artifacts/d70f9c4f-d7a0-4172-b2cd-fa1cd572ae29
+
+
+class Solution {
+    unordered_map<int, int> dp;
+
+public:
+    int minExtraChar(string s, vector<string>& dictionary) {
+        dp[s.size()] = 0;
+        return dfs(0, s, dictionary);
+    }
+
+private:
+    int dfs(int i, string& s, vector<string>& dictionary) {
+        if (dp.count(i)) {
+            return dp[i];
+        }
+
+        int res = 1 + dfs(i + 1, s, dictionary);
+        for (const string& word : dictionary) {
+            if (i + word.size() > s.size()) continue;
+
+            bool flag = true;
+            for (int j = 0; j < word.size(); j++) {
+                if (s[i + j] != word[j]) {
+                    flag = false;
+                    break;
+                }
+            }
+            if (flag) {
+                res = min(res, dfs(i + word.size(), s, dictionary));
+            }
+        }
+        return dp[i] = res;
+    }
+};
+
+========================================================================================================================================================================
+Approach5- Dynamic Programming (Bottom-Up)
+
+https://claude.ai/public/artifacts/9bbf760c-2e04-42f3-be8b-2b90bd82000a
+
+class Solution { 
+public: 
+int minExtraChar(string s, vector<string>& dictionary) { 
+int n = s.size();
+ vector<int> dp(n + 1, 0); // DP array initialization 
+ for (int i = n - 1; i >= 0; i--) { // Bottom-up approach 
+ dp[i] = 1 + dp[i + 1]; // Skip current character 
+ for (const string& word : dictionary) { 
+ if (i + word.size() <= n && s.substr(i, word.size()) == word) { 
+ dp[i] = min(dp[i], dp[i + word.size()]); 
+ } 
+ } 
+ } 
+ return dp[0]; 
+ } 
+ };
+
+===========================================================================================================================================================================
+
+Approach6- Dynamic Programming (Top-Down) Using Trie
+
+https://claude.ai/public/artifacts/87295a38-4083-4816-83bc-d8b9a9e8d3e2
+
+class TrieNode {
+public:
+    TrieNode* children[26];
+    bool isWord;
+
+    TrieNode() {
+        for (int i = 0; i < 26; ++i) children[i] = nullptr;
+        isWord = false;
+    }
+};
+
+class Trie {
+public:
+    TrieNode* root;
+
+    Trie() {
+        root = new TrieNode();
+    }
+
+    void addWord(const string& word) {
+        TrieNode* curr = root;
+        for (char c : word) {
+            if (!curr->children[c - 'a']) {
+                curr->children[c - 'a'] = new TrieNode();
+            }
+            curr = curr->children[c - 'a'];
+        }
+        curr->isWord = true;
+    }
+};
+
+class Solution {
+public:
+    int minExtraChar(string s, vector<string>& dictionary) {
+        Trie trie;
+        for (const string& word : dictionary) {
+            trie.addWord(word);
+        }
+
+        vector<int> dp(s.size() + 1, -1);
+        return dfs(0, s, trie, dp);
+    }
+
+private:
+    int dfs(int i, const string& s, Trie& trie, vector<int>& dp) {
+        if (i == s.size()) return 0;
+        if (dp[i] != -1) return dp[i];
+
+        int res = 1 + dfs(i + 1, s, trie, dp);
+        TrieNode* curr = trie.root;
+
+        for (int j = i; j < s.size(); ++j) {
+            if (!curr->children[s[j] - 'a']) break;
+            curr = curr->children[s[j] - 'a'];
+            if (curr->isWord) {
+                res = min(res, dfs(j + 1, s, trie, dp));
+            }
+        }
+
+        dp[i] = res;
+        return res;
+    }
+};
+
+============================================================================================================================================================
+Approach7- Dynamic Programming (Bottom-Up) Using Trie
+
+https://claude.ai/public/artifacts/b3158050-92e7-44fb-82ae-4bc7792a1a05
+
+class TrieNode {
+public:
+    TrieNode* children[26];
+    bool isWord;
+
+    TrieNode() {
+        for (int i = 0; i < 26; ++i) children[i] = nullptr;
+        isWord = false;
+    }
+};
+
+class Trie {
+public:
+    TrieNode* root;
+
+    Trie() {
+        root = new TrieNode();
+    }
+
+    void addWord(const string& word) {
+        TrieNode* curr = root;
+        for (char c : word) {
+            if (!curr->children[c - 'a']) {
+                curr->children[c - 'a'] = new TrieNode();
+            }
+            curr = curr->children[c - 'a'];
+        }
+        curr->isWord = true;
+    }
+};
+
+class Solution {
+public:
+    int minExtraChar(string s, vector<string>& dictionary) {
+        Trie trie;
+        for (const string& word : dictionary) {
+            trie.addWord(word);
+        }
+
+        int n = s.size();
+        vector<int> dp(n + 1);
+        for (int i = n - 1; i >= 0; --i) {
+            dp[i] = 1 + dp[i + 1];
+            TrieNode* curr = trie.root;
+
+            for (int j = i; j < n; ++j) {
+                if (!curr->children[s[j] - 'a']) break;
+                curr = curr->children[s[j] - 'a'];
+                if (curr->isWord) {
+                    dp[i] = min(dp[i], dp[j + 1]);
+                }
+            }
+        }
+
+        return dp[0];
+    }
+};
